@@ -27,7 +27,7 @@ from ADT import map as map
 from ADT import list as lt
 from DataStructures import listiterator as it
 from datetime import datetime
-
+from DataStructures import dijkstra as dj 
 """
 Se define la estructura de un catálogo de libros.
 El catálogo tendrá tres listas, una para libros, otra para autores 
@@ -75,10 +75,12 @@ def getShortestPath (catalog, source, dst):
     Retorna el camino de menor costo entre vertice origen y destino, si existe 
     """
     print("vertices: ",source,", ",dst)
+    dis=dj.newDijkstra(catalog["librariesGraph"],source)
+    path=dj.pathTo(dis,dst)
     # ejecutar Dijkstra desde source
     # obtener el camino hasta dst
     # retornar el camino
-    return None
+    return path
     
 # Funciones de comparacion
 

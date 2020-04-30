@@ -31,7 +31,7 @@ def newDijkstra(graph, s):
         v = minpq.delMin(pq)
         if not g.containsVertex(graph,v):
             raise Exception("Vertex ["+v+"] is not in the graph")
-        adj=g.adjacents(graph,v)
+        adj=g.adjacentEdges(graph,v)
         itadj=it.newIterator(adj)
         while (it.hasNext(itadj)):
             vadj=it.next(itadj)
@@ -110,4 +110,3 @@ def nextPrime(N):
         if(isPrime(prime) == True): 
             found = True
     return prime 
-
