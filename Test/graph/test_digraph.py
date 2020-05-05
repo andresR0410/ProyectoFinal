@@ -5,6 +5,8 @@ from DataStructures import listiterator as it
 from ADT import graph as g
 from ADT import queue as q
 from ADT import list as lt
+from DataStructures import dijkstra as dk
+from ADT import stack as stk
 
 
 class DigraphTest (unittest.TestCase):
@@ -188,6 +190,47 @@ class DigraphTest (unittest.TestCase):
 
         lst = g.adjacents (graph, 'Manizales')
         self.assertEqual (lt.size(lst), 0)
+
+    def test_dijkstra (self):
+        graph = g.newGraph(7, self.comparenames, directed=True)
+
+        g.insertVertex (graph, 'Bogota')
+        g.insertVertex (graph, 'Yopal')
+        g.insertVertex (graph, 'Cali')
+        g.insertVertex (graph, 'Medellin')
+        g.insertVertex (graph, 'Pasto')
+        g.insertVertex (graph, 'Barranquilla')
+        g.insertVertex (graph, 'Manizales')
+
+        g.addEdge (graph, 'Bogota', 'Yopal', 2.5)
+        g.addEdge (graph, 'Bogota', 'Medellin', 0.1)
+        g.addEdge (graph, 'Bogota', 'Pasto', 16)
+        g.addEdge (graph, 'Bogota', 'Cali', 3.2)
+        g.addEdge (graph, 'Cali', 'Bogota', 4.8)
+        g.addEdge (graph, 'Yopal', 'Medellin', 9.1)
+        g.addEdge (graph, 'Medellin', 'Pasto', 7.1)
+        g.addEdge (graph, 'Pasto', 'Bogota', 9.3)
+        g.addEdge (graph, 'Cali', 'Pasto', 4.7)
+        g.addEdge (graph, 'Cali', 'Barranquilla', 1.2)
+        g.addEdge (graph, 'Barranquilla', 'Pasto', 0.0)
+
+        dis= dk.newDijkstra(graph, 'Bogota')
+        path1=dk.pathTo(dis, 'Pasto')
+        path2=dk.pathTo(dis,'Medellin')
+        path3=dk.pathTo(dis, 'Manizales')
+
+        totalDist1 = 0
+        while not stk.isEmpty (path1): 
+            step = stk.pop(path1)
+            totalDist1 += step['weight']
+        totalDist2 = 0
+        while not stk.isEmpty (path2): 
+            step = stk.pop(path2)
+            totalDist2 += step['weight']
+
+        self.assertEqual(totalDist1, 4.4)
+        self.assertEqual(totalDist2, 0.1)
+        self.assertIsNone(path3)
 
 
 if __name__ == "__main__":
