@@ -40,33 +40,29 @@ def newCatalog():
     """
     Inicializa el catálogo y retorna el catalogo inicializado.
     """
-    libgraph = g.newGraph(7235,compareByKey,directed=True)
-    catalog = {'librariesGraph':libgraph}    
+    graph = g.newGraph(111353 ,compareByKey, directed=True)
+    catalog = {'Graph':graph}    
     return catalog
 
+def addNode (catalog, row):
+    """
+    Adiciona un nodo para almacenar un libro o usuario 
+    """
+    if not g.containsVertex(catalog['Graph'], row['VERTEX']):
+        g.insertVertex (catalog['Graph'], row['VERTEX'])
 
-def addLibraryNode (catalog, row):
+def addEdge (catalog, row):
     """
-    Adiciona un nodo para almacenar una biblioteca
+    Adiciona un enlace para almacenar una revisión
     """
-    if not g.containsVertex(catalog['librariesGraph'], row['ID_src']):
-        g.insertVertex (catalog['librariesGraph'], row['ID_src'])
-    if not g.containsVertex(catalog['librariesGraph'], row['ID_dst']):
-        g.insertVertex (catalog['librariesGraph'], row['ID_dst'])
-
-def addLibraryEdge  (catalog, row):
-    """
-    Adiciona un enlace entre bibliotecas
-    """
-    g.addEdge (catalog['librariesGraph'], row['ID_src'], row['ID_dst'], float(row['dist']))
-
+    g.addEdge (catalog['Graph'], row['SOURCE'], row['DEST'], float(row['ARRIVAL_DELAY']))
 
 def countNodesEdges (catalog):
     """
-    Retorna la cantidad de nodos y enlaces del grafo de bibliotecas
+    Retorna la cantidad de nodos y enlaces del grafo de revisiones
     """
-    nodes = g.numVertex(catalog['librariesGraph'])
-    edges = g.numEdges(catalog['librariesGraph'])
+    nodes = g.numVertex(catalog['Graph'])
+    edges = g.numEdges(catalog['Graph'])
 
     return nodes,edges
 
@@ -75,7 +71,7 @@ def getShortestPath (catalog, source, dst):
     Retorna el camino de menor costo entre vertice origen y destino, si existe 
     """
     print("vertices: ",source,", ",dst)
-    dis=dj.newDijkstra(catalog["librariesGraph"],source)
+    dis=dj.newDijkstra(catalog["Graph"],source)
     path=dj.pathTo(dis,dst)
     # ejecutar Dijkstra desde source
     # obtener el camino hasta dst

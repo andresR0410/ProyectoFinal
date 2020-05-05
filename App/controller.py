@@ -47,25 +47,33 @@ def printList (lst):
 
 
 # Funciones para la carga de datos 
-
-def loadLibraries (catalog, sep=','):
+def loadFlights (catalog, sep=';'):
     """
-    Carga las bibliotecas del archivo.
-    Por cada para de bibliotecas, se almacena la distancia en kilometros entre ellas.
+    Carga los libros del archivo.  Por cada libro se toman sus autores y por 
+    cada uno de ellos, se crea un arbol de autores, a dicho autor y una
+    referencia al libro que se esta procesando.
     """
     t1_start = process_time() #tiempo inicial
-    libsFile = cf.data_dir + 'GoodReads/libraries_edges.csv'
+    nodesfile = cf.data_dir + 'flights_nodes.csv'
+    edgesfile = cf.data_dir + 'flights_edges.csv'
     dialect = csv.excel()
     dialect.delimiter=sep
-    with open(libsFile, encoding="utf-8-sig") as csvfile:
+    with open(nodesfile, encoding="utf-8-sig") as csvfile:
         spamreader = csv.DictReader(csvfile, dialect=dialect)
+        t2_start = process_time() #tiempo inicial
         for row in spamreader:
-            model.addLibraryNode (catalog, row)
-            model.addLibraryEdge (catalog, row)
+            model.addNode(catalog, row)
+        t2_stop = process_time() #tiempo final
+    with open(edgesfile, encoding="utf-8-sig") as csvfile:
+        spamreader = csv.DictReader(csvfile, dialect=dialect)
+        t3_start = process_time() #tiempo inicial
+        for row in spamreader:
+            model.addEdge(catalog, row)
+        t3_stop = process_time() #tiempo final
     t1_stop = process_time() #tiempo final
-    print("Tiempo de ejecución carga de grafo de bibliotecas:",t1_stop-t1_start," segundos")   
-
-
+    print("Tiempo de ejecución carga de grafo de vuelos",t1_stop-t1_start," segundos\n"
+    "Tiempo de carga de nodos",t2_stop-t2_start,"segundos\n"
+    "Tiempo de carga de arcos",t3_stop-t3_start,"segundos")   
 
 def initCatalog ():
     """
@@ -80,7 +88,7 @@ def loadData (catalog):
     """
     Carga los datos de los archivos en la estructura de datos
     """
-    loadLibraries(catalog)    
+    loadFlights(catalog)    
 
 # Funciones llamadas desde la vista y enviadas al modelo
 
