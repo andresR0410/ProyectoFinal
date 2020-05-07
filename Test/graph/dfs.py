@@ -50,7 +50,22 @@ def pathTo(search, v):
         v = map.get(search['visitedMap'],v)['value']['edgeTo']
     stk.push(path,search['s'])
     return path
-
+    
+def countCC (graph):
+    counter = 0
+    listVert = gs.vertices(graph)
+    if not lt.isEmpty(listVert):
+        counter = 1
+        source = lt.firstElement(listVert)
+        search = newDFS(graph, source)
+        vert_iter = it.newIterator(listVert)
+        while (it.hasNext(vert_iter)):
+            v = it.next (vert_iter)
+            if not map.get(search['visitedMap'], v):
+                map.put(search['visitedMap'], v, {'marked':True,'edgeTo':None})
+                dfs(search, v)
+                counter+=1
+    return counter
 
 
 # Function to return the smallest  

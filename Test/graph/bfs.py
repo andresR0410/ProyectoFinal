@@ -8,6 +8,16 @@ from DataStructures import edge as e
 from ADT import stack as stk
 from ADT import list as lt
 
+def newBFS(graph, source):
+    """
+    Crea una busqueda BFS para un grafo y un vertice origen
+    """
+    prime = nextPrime (g.numVertex(graph) * 2)
+    search={'graph':graph, 's':source, 'visitedMap':None}
+    search['visitedMap'] = map.newMap(capacity=prime, maptype='PROBING', comparefunction=graph['comparefunction'])
+    map.put(search['visitedMap'],source, {'marked':True,'edgeTo':None,'distTo':0})
+    bfs(search, source)
+    return search
 
 def bfs (search, source):
     queue = q.newQueue()
@@ -15,13 +25,23 @@ def bfs (search, source):
     while not (q.isEmpty(queue)):
         v = q.dequeue (queue)
         visited_v = map.get(search['visitedMap'], v)['value']
+        adjs = g.adjacents(search['graph'],v)
+        adjs_iter = it.newIterator (adjs)
+        while (it.hasNext(adjs_iter)):
+            w = it.next (adjs_iter)
+            visited_w = map.get(search['visitedMap'], w)
+            if visited_w == None:
+                map.put(search['visitedMap'], w, {'marked':True, 'edgeTo':v, 'distTo':visited_v['distTo']+1})
+                q.enqueue(queue, w)
         # Loop v's adjacent vertices with w
         # If w has not visited 
         # Visit w 
         # Enqueue w
 
 def hasPathTo(search, v):
-    # Has v been visited?
+    element = map.get(search['visitedMap'],v)
+    if element and element['value']['marked']==True:
+        return True
     return False
 
 
@@ -30,6 +50,10 @@ def pathTo(search, v):
     if hasPathTo(search, v)==False:
         return None
     path= stk.newStack()
+    while v != search['s']:
+        stk.push(path,v)
+        v = map.get(search['visitedMap'],v)['value']['edgeTo']
+    stk.push(path,search['s'])
     # Loop through previous vertices (edgeTo) until source vertex:
     # Add each previous vertex to the path
     # At the end of the loop, add the source vertex to the path

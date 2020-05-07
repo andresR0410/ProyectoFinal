@@ -56,6 +56,8 @@ def loadFlights (catalog, sep=';'):
     t1_start = process_time() #tiempo inicial
     nodesfile = cf.data_dir + 'flights_nodes.csv'
     edgesfile = cf.data_dir + 'flights_edges.csv'
+    nodesdirectedfile= cf.data_dir + "flights_nodes_dir.csv"
+    edgesdirectedfile= cf.data_dir +  "flights_edges_dir.csv"
     dialect = csv.excel()
     dialect.delimiter=sep
     with open(nodesfile, encoding="utf-8-sig") as csvfile:
@@ -69,6 +71,17 @@ def loadFlights (catalog, sep=';'):
         t3_start = process_time() #tiempo inicial
         for row in spamreader:
             model.addEdge(catalog, row)
+    with open(nodesdirectedfile, encoding="utf-8-sig") as csvfile:
+        spamreader = csv.DictReader(csvfile, dialect=dialect)
+        t2_start = process_time() #tiempo inicial
+        for row in spamreader:
+            model.addDirectedNode(catalog, row)
+        t2_stop = process_time() #tiempo final
+    with open(edgesdirectedfile, encoding="utf-8-sig") as csvfile:
+        spamreader = csv.DictReader(csvfile, dialect=dialect)
+        t3_start = process_time() #tiempo inicial
+        for row in spamreader:
+            model.addDirectedEdge(catalog, row)
         t3_stop = process_time() #tiempo final
     t1_stop = process_time() #tiempo final
     print("Tiempo de ejecución carga de grafo de vuelos",t1_stop-t1_start," segundos\n"
@@ -109,4 +122,31 @@ def getShortestPath(catalog, vertices):
     t1_stop = process_time() #tiempo final
     print("Tiempo de ejecución de dijkstra: ",t1_stop-t1_start," segundos")
     return path
+
+def getPath(catalog, vertices):
+    t1_start = process_time() #tiempo inicial
+    source=vertices.split(" ")[0]
+    dst=vertices.split(" ")[1]
+    path = model.getPath(catalog, source, dst)
+    t1_stop = process_time() #tiempo final
+    print("Tiempo de ejecución de dfs",t1_stop-t1_start," segundos")
+    return path
+
+def getPathLeastEdges(catalog, vertices):
+    #llama a una nueva función en model que utiliza bfs enviando src y dst
+    #retorna el camino
+    t1_start = process_time() #tiempo inicial
+    source=vertices.split(" ")[0]
+    dst=vertices.split(" ")[1]
+    path = model.shorterPath(catalog, source, dst)
+    t1_stop = process_time() #tiempo final
+    print("Tiempo de ejecución de dfs",t1_stop-t1_start," segundos")
+    return path
+
+def countCC(catalog):
+    t1_start = process_time() #tiempo inicial
+    ccs = model.countCC(catalog) 
+    t1_stop = process_time() #tiempo final
+    print("Tiempo de ejecución de conteo de componentes conectados:",t1_stop-t1_start," segundos")
+    return ccs
 
