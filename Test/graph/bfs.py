@@ -14,7 +14,7 @@ def newBFS(graph, source):
     """
     prime = nextPrime (g.numVertex(graph) * 2)
     search={'graph':graph, 's':source, 'visitedMap':None}
-    search['visitedMap'] = map.newMap(capacity=prime, maptype='PROBING', comparefunction=graph['comparefunction'])
+    search['visitedMap'] = map.newMap(prime=prime, maptype='PROBING', comparefunction=graph['comparefunction'])
     map.put(search['visitedMap'],source, {'marked':True,'edgeTo':None,'distTo':0})
     bfs(search, source)
     return search
