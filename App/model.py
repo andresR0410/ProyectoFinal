@@ -30,6 +30,7 @@ from datetime import datetime
 from DataStructures import dijkstra as dj 
 import Test.graph.dfs as dfs
 import Test.graph.bfs as bfs
+from Sorting import mergesort
 """
 Se define la estructura de un catálogo de libros.
 El catálogo tendrá tres listas, una para libros, otra para autores 
@@ -42,10 +43,29 @@ def newCatalog():
     """
     Inicializa el catálogo y retorna el catalogo inicializado.
     """
-    graph = g.newGraph(111353 ,compareByKey, directed=False)
-    graphdi=g.newGraph(111353 ,compareByKey, directed=True)
-    catalog = {'Graph':graph,'GraphDirected':graphdi}    
+    capacityMap = map.newMap(maptype='PROBING',comparefunction=compareByKey)
+    catalog = {'capacityMap':capacityMap}
     return catalog
+
+def addToHash (catalog, row):
+    capacity_station = (row['dock_count'],row['name'])
+    if map.contains(catalog['capacityMap'],row['city']):
+        statcapList = map.get(catalog['capacityMap'],row['city'])
+        lt.addFirst(stationCapacityList,capacity_station)
+    else:
+        stationCapacityList = lt.newList('ARRAY')
+        lt.addFirst(stationCapacityList,capacity_station)
+        map.put(catalog['capacityMap'],row['city'], stationCapacityList)
+        # FALTA ALGORITMO DE ORDENAMIENTO DE LISTAS
+
+def sortHash (catalog):
+    #Iterar tabla de hash, extraer lista de llaves, ordenar cada lista de tuplas con mergeSort
+    citiesList = map.keySet(catalog['capacityMap'])
+    citiesIter = it.newIterator(citiesList)
+    while it.hasNext(citiesIter):
+        i_city = it.next(citiesIter)
+        stationCapacityList = map.get(catalog['capacityMap'], i_city)
+        mergesort.mergesort(stationCapacityList, compareByKey) #Revisar compareFunction
 
 def addDirectedNode (catalog, row):
     """
@@ -59,43 +79,6 @@ def addDirectedEdge (catalog, row):
     Adiciona un enlace para almacenar una revisión
     """
     g.addEdge (catalog['GraphDirected'], row['SOURCE'], row['DEST'], float(row['ARRIVAL_DELAY']))
-
-def addNode (catalog, row):
-    """
-    Adiciona un nodo para almacenar un libro o usuario 
-    """
-    if not g.containsVertex(catalog['Graph'], row['VERTEX']):
-        g.insertVertex (catalog['Graph'], row['VERTEX'])
-
-def addEdge (catalog, row):
-    """
-    Adiciona un enlace para almacenar una revisión
-    """
-    g.addEdge (catalog['Graph'], row['SOURCE'], row['DEST'], row['ARRIVAL_DELAY'])
-
-def countNodesEdges (catalog):
-    """
-    Retorna la cantidad de nodos y enlaces del grafo de revisiones
-    """
-    nodes = g.numVertex(catalog['Graph'])
-    edges = g.numEdges(catalog['Graph'])
-
-    return nodes,edges
-
-def getShortestPath (catalog, source, dst):
-    """
-    Retorna el camino de menor costo entre vertice origen y destino, si existe 
-    """
-    print("vertices: ",source,", ",dst)
-    dis=dj.newDijkstra(catalog["GraphDirected"],source)
-    path=dj.pathTo(dis,dst)
-    # ejecutar Dijkstra desde source
-    # obtener el camino hasta dst
-    # retornar el camino
-    return path
-
-def countCC(catalog):
-    return dfs.countCC(catalog['Graph'])
 
 def getPath (catalog, source, dst):
     """
@@ -139,5 +122,4 @@ def shorterPath (catalog, source, dst):
 # Funciones de comparacion
 
 def compareByKey (key, element):
-    return  (key == element['key'] )  
-
+    return  (key == element['key'] )

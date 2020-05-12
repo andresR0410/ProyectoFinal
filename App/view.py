@@ -40,13 +40,12 @@ operación solicitada
 
 
 def printMenu():
-    print("Bienvenido al Laboratorio 9")
+    print("Bienvenido al Proyecto Final")
     print("1- Cargar información")
-    print("2- Contar nodos y enlances cargados ")
-    print("3- Obtener el camino de menor costo entre dos vértices usando Dijkstra (origen destino)")
-    print("4- Contar componentes conectados en el grafo")
-    print("5- Existe una ruta entre dos aeropuertos para un fecha determinada, volver (dfs)")
-    print("6- Ruta con menos escalas entre dos aeropuertos (bfs)")
+    print("2- Obtener el top 3 de estaciones por capacidad para una ciudad dada ") #Requerimento 1
+    print("3- Obtener la cantidad de viajes realizados por ciudad para un rango de fechas") #Requerimento 2
+    print("4- Obtener la cantidad de viajes por día para los n días con mayor y menor temperatura promedio") #Requerimento 3
+    print("5- Obtener la ruta de menor duración entre dos estaciones a partir de los viajes realizados") #Requerimento 4
     print("0- Salir")
 
 
@@ -75,35 +74,21 @@ def main():
             print("Cargando información de los archivos ....")
             catalog = initCatalog ()
             loadData (catalog)
-        elif int(inputs[0])==2:
-            verticesNum, edgesNum = controller.countNodesEdges(catalog) 
-            print("El grafo tiene: ", verticesNum," nodos y", edgesNum," enlaces")
-        elif int(inputs[0])==3: #Requerimento 3
-            vertices =input("Ingrese el vertice origen y destino\n")
-            path = controller.getShortestPath(catalog,vertices)
-            print("El camino de menor costo entre los vertices es:")
-            totalDist = 0
+        elif int(inputs[0])==2:#Requerimento 1
+            mostCapacity = controller.mostCapacity (catalog, 3)
+            print(mostCapacity)
+        elif int(inputs[0])==3: #Requerimento 2
+            
             if path:
                 while not stk.isEmpty(path):
                     step = stk.pop(path)
                     totalDist += step['weight']
                     print (step['vertexA'] + "-->" + step['vertexB'] + " costo: " + str(step['weight']))
             print ("Total: " + str (totalDist))
-        elif int(inputs[0]==4): #Requerimento 1
-            ccs = controller.countCC(catalog)
-            print("El grafo tiene :", ccs, 'componentes conectados') 
-        elif int(inputs[0]==5): #Requerimento 2
-            vertices =input("Ingrese el vertice origen y destino\n")
-            lst = controller.getPath(catalog,vertices)
-            if lst:
-                print("El camino entre los vertices es:",lst)
-            else:
-                print("No hay camino")
-        elif int(inputs[0]==6):#Requerimento 4
-            vertices =input("Ingrese el vertice origen y destino\n")
-            leastPath=controller.getPathLeastEdges(catalog, vertices)
-            if leastPath:
-                print("El camino más corto entre los vértices es: ",leastPath)
+        elif int(inputs[0]==4): #Requerimento 3
+            
+        elif int(inputs[0]==5): #Requerimento 4
+            
         else:
             sys.exit(0)
     sys.exit(0)

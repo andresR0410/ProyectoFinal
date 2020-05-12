@@ -54,39 +54,19 @@ def loadFlights (catalog, sep=';'):
     referencia al libro que se esta procesando.
     """
     t1_start = process_time() #tiempo inicial
-    nodesfile = cf.data_dir + 'flights_nodes.csv'
-    edgesfile = cf.data_dir + 'flights_edges.csv'
-    nodesdirectedfile= cf.data_dir + "flights_nodes_dir.csv"
-    edgesdirectedfile= cf.data_dir +  "flights_edges_dir.csv"
+    hashValues = cf.data_dir + 'station.csv'
     dialect = csv.excel()
     dialect.delimiter=sep
-    with open(nodesfile, encoding="utf-8-sig") as csvfile:
+    with open(hashValues, encoding="utf-8-sig") as csvfile:
         spamreader = csv.DictReader(csvfile, dialect=dialect)
         t2_start = process_time() #tiempo inicial
         for row in spamreader:
-            model.addNode(catalog, row)
+            model.addToHash(catalog, row)
         t2_stop = process_time() #tiempo final
-    with open(edgesfile, encoding="utf-8-sig") as csvfile:
-        spamreader = csv.DictReader(csvfile, dialect=dialect)
-        t3_start = process_time() #tiempo inicial
-        for row in spamreader:
-            model.addEdge(catalog, row)
-    with open(nodesdirectedfile, encoding="utf-8-sig") as csvfile:
-        spamreader = csv.DictReader(csvfile, dialect=dialect)
-        t2_start = process_time() #tiempo inicial
-        for row in spamreader:
-            model.addDirectedNode(catalog, row)
-        t2_stop = process_time() #tiempo final
-    with open(edgesdirectedfile, encoding="utf-8-sig") as csvfile:
-        spamreader = csv.DictReader(csvfile, dialect=dialect)
-        t3_start = process_time() #tiempo inicial
-        for row in spamreader:
-            model.addDirectedEdge(catalog, row)
-        t3_stop = process_time() #tiempo final
+    model.sortHash(catalog)
     t1_stop = process_time() #tiempo final
-    print("Tiempo de ejecución carga de grafo de vuelos",t1_stop-t1_start," segundos\n"
-    "Tiempo de carga de nodos",t2_stop-t2_start,"segundos\n"
-    "Tiempo de carga de arcos",t3_stop-t3_start,"segundos")   
+    print("Tiempo de ejecución carga de tabla de hash (req1) de estaciones por capacidad por ciudad",t1_stop-t1_start," segundos\n"
+     
 
 def initCatalog ():
     """
@@ -104,15 +84,6 @@ def loadData (catalog):
     loadFlights(catalog)    
 
 # Funciones llamadas desde la vista y enviadas al modelo
-
-
-def countNodesEdges(catalog):
-    t1_start = process_time() #tiempo inicial
-    nodes, edges = model.countNodesEdges(catalog)
-    t1_stop = process_time() #tiempo final
-    print("Tiempo de ejecución de conteo de componentes conectados:",t1_stop-t1_start," segundos")
-    return nodes, edges
-
 
 def getShortestPath(catalog, vertices):
     t1_start = process_time() #tiempo inicial
@@ -143,10 +114,6 @@ def getPathLeastEdges(catalog, vertices):
     print("Tiempo de ejecución de dfs",t1_stop-t1_start," segundos")
     return path
 
-def countCC(catalog):
-    t1_start = process_time() #tiempo inicial
-    ccs = model.countCC(catalog) 
-    t1_stop = process_time() #tiempo final
-    print("Tiempo de ejecución de conteo de componentes conectados:",t1_stop-t1_start," segundos")
-    return ccs
-
+def mostCapacity (catalog, number_capacities):
+    Raw_map = catalog['capacityMap']
+    
