@@ -75,7 +75,7 @@ def main():
             catalog = initCatalog ()
             loadData (catalog)
         elif int(inputs[0])==2:#Requerimento 1
-            mostCapacity = controller.mostCapacity (catalog, 3)
+            mostCapacity = controller.mostCapacity (catalog, city, 3)
             print(mostCapacity)
         elif int(inputs[0])==3: #Requerimento 2
             

@@ -55,6 +55,7 @@ def loadFlights (catalog, sep=';'):
     """
     t1_start = process_time() #tiempo inicial
     hashValues = cf.data_dir + 'station.csv'
+    tree =  cf.data_dir + 'trip.csv'
     dialect = csv.excel()
     dialect.delimiter=sep
     with open(hashValues, encoding="utf-8-sig") as csvfile:
@@ -62,8 +63,16 @@ def loadFlights (catalog, sep=';'):
         t2_start = process_time() #tiempo inicial
         for row in spamreader:
             model.addToHash(catalog, row)
+            model.addToStationHash(catalog,row)
         t2_stop = process_time() #tiempo final
-    model.sortHash(catalog)
+    model.sortHash(catalog['capacityMap'])
+
+    with open(tree, encoding="utf-8-sig") as csvfile:
+        spamreader = csv.DictReader(csvfile, dialect=dialect)
+        t3_start = process_time() #tiempo inicial
+        for row in spamreader:
+            model.addToTree(catalog, row)
+        t3_stop = process_time() #tiempo final
     t1_stop = process_time() #tiempo final
     print("Tiempo de ejecución carga de tabla de hash (req1) de estaciones por capacidad por ciudad",t1_stop-t1_start," segundos\n"
      
@@ -114,6 +123,10 @@ def getPathLeastEdges(catalog, vertices):
     print("Tiempo de ejecución de dfs",t1_stop-t1_start," segundos")
     return path
 
-def mostCapacity (catalog, number_capacities):
-    Raw_map = catalog['capacityMap']
-    
+def mostCapacity (catalog, city, number_capacities):
+    t1_start = process_time() #tiempo inicial
+    mostCapacities = model.mostCapacity(catalog, city, number_capacities)
+    t1_stop = process_time() #tiempo final
+    print("Tiempo de ejecución de mostCapacity",t1_stop-t1_start," segundos")
+    mostCapacities=('Top'+str(number_capacities)+': ',mostCapacities[0]+'\n'+ 'Less'+str(number_capacities)+': ',mostCapacities[1])
+    return mostCapacities
