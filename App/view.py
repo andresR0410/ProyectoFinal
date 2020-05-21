@@ -78,17 +78,18 @@ def main():
             mostCapacity = controller.mostCapacity (catalog, city, 3)
             print(mostCapacity)
         elif int(inputs[0])==3: #Requerimento 2
+            dates = input("Ingrese las fechas a consultar separadas por un espacio: ")
+            tripsCityforDates = controller.tripsCityforDates(catalog, dates)
+            #Imprima bonito
+        elif int(inputs[0]==4): #Requerimento 3
             
+        elif int(inputs[0]==5): #Requerimento 4
             if path:
                 while not stk.isEmpty(path):
                     step = stk.pop(path)
                     totalDist += step['weight']
                     print (step['vertexA'] + "-->" + step['vertexB'] + " costo: " + str(step['weight']))
-            print ("Total: " + str (totalDist))
-        elif int(inputs[0]==4): #Requerimento 3
-            
-        elif int(inputs[0]==5): #Requerimento 4
-            
+                print ("Total: " + str (totalDist))
         else:
             sys.exit(0)
     sys.exit(0)

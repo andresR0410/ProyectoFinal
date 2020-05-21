@@ -103,26 +103,6 @@ def getShortestPath(catalog, vertices):
     print("Tiempo de ejecución de dijkstra: ",t1_stop-t1_start," segundos")
     return path
 
-def getPath(catalog, vertices):
-    t1_start = process_time() #tiempo inicial
-    source=vertices.split(" ")[0]
-    dst=vertices.split(" ")[1]
-    path = model.getPath(catalog, source, dst)
-    t1_stop = process_time() #tiempo final
-    print("Tiempo de ejecución de dfs",t1_stop-t1_start," segundos")
-    return path
-
-def getPathLeastEdges(catalog, vertices):
-    #llama a una nueva función en model que utiliza bfs enviando src y dst
-    #retorna el camino
-    t1_start = process_time() #tiempo inicial
-    source=vertices.split(" ")[0]
-    dst=vertices.split(" ")[1]
-    path = model.shorterPath(catalog, source, dst)
-    t1_stop = process_time() #tiempo final
-    print("Tiempo de ejecución de dfs",t1_stop-t1_start," segundos")
-    return path
-
 def mostCapacity (catalog, city, number_capacities):
     t1_start = process_time() #tiempo inicial
     mostCapacities = model.mostCapacity(catalog, city, number_capacities)
@@ -130,3 +110,12 @@ def mostCapacity (catalog, city, number_capacities):
     print("Tiempo de ejecución de mostCapacity",t1_stop-t1_start," segundos")
     mostCapacities=('Top'+str(number_capacities)+': ',mostCapacities[0]+'\n'+ 'Less'+str(number_capacities)+': ',mostCapacities[1])
     return mostCapacities
+
+def tripCityforDates (catalog, dates):
+    t1_start = process_time() #tiempo inicial
+    start_date=dates.split(" ")[0]
+    end_date=dates.split(" ")[1]
+    tripCitiesDates = model.tripCityforDates(catalog, start_date, end_date)
+    t1_stop = process_time() #tiempo final
+    print("Tiempo de ejecución de tripCityforDates: "t1_stop-t1_start," segundos")
+    return tripCitiesDates

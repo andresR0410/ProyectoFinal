@@ -48,7 +48,8 @@ def newCatalog():
     capacityMap = map.newMap(maptype='PROBING',comparefunction=compareByKey)
     stationMap = map.newMap(97,maptype='CHAINING',comparefunction=compareByKey)
     tree = oms.newMap()
-    catalog = {'capacityMap':capacityMap, 'stationMap': stationMap,"dateTree": tree}
+    gdir = g.newGraph(97, compareByKey, directed=True)
+    catalog = {'capacityMap':capacityMap, 'stationMap': stationMap,"dateTree": tree, "GraphDirected":gdir}
     return catalog
 
 def addToHash (catalog, row):
@@ -68,13 +69,19 @@ def addToStationHash (catalog, row):
 def addToTree (catalog, row):
     tree=catalog['dateTree'] #Árbol RBT ordenado por fecha
     date=strToDate(row['start_date'], '%m/%d/%Y') #Convertir fecha a str
-    stationInf = map.get(catalog['stationMap'], row['id']) #Tupla con el nombre y la ciudad de la estación 
-
-    if oms.contains(tree, date, compareByKey):
-    
+    StationInf = map.get(catalog['stationMap'], row['start_station_id'])[1] #Ciudad de la estación 
+    if oms.contains(tree, date, greater):
+        dateValue = oms.get(tree, date, greater)
+        if map.contains(dateValue, StationInf):
+            value = map.get(dateValue, StationInf)
+            dateValue = map.put(dateValue, StationInf, value+1)
+        else:
+            dateValue = map.put(dateValue, StationInf, 1)
+        tree = oms.put(tree, date, dateValue, greater)
     else:
-        
-        tree = oms.put(tree, date, tripCityMap, compareByKey)
+        DateValueMap = map.newMap(97, 'CHAINING', compareByKey)
+        dateValue = map.put(DateValueMap, StationInf, 1)
+        tree = oms.put(tree, date, dateValue, greater)
 
 def strToDate(date_string, format):
     
@@ -97,54 +104,14 @@ def addDirectedNode (catalog, row):
     """
     Adiciona un nodo para almacenar un libro o usuario 
     """
-    if not g.containsVertex(catalog['GraphDirected'], row['VERTEX']):
-        g.insertVertex (catalog['GraphDirected'], row['VERTEX'])
+    if not g.containsVertex(catalog['GraphDirected'], row['start_station_id']):
+        g.insertVertex (catalog['GraphDirected'], row['start_station_id'])
 
 def addDirectedEdge (catalog, row):
     """
     Adiciona un enlace para almacenar una revisión
     """
-    g.addEdge (catalog['GraphDirected'], row['SOURCE'], row['DEST'], float(row['ARRIVAL_DELAY']))
-
-def getPath (catalog, source, dst):
-    """
-    Retorna el camino, si existe, entre vertice origen y destino
-    """
-    print("vertices: ",source,", ",dst)
-    graph = catalog['Graph']
-    # ejecutar dfs desde source
-    search= dfs.newDFS(graph, source)
-    # obtener el camino hasta dst
-    response = ''
-    path = dfs.pathTo(search, dst)
-    if path:
-        iteraPath=it.newIterator(path)
-        while it.hasNext(iteraPath):
-            Vertex = it.next(iteraPath)
-            response += Vertex + '\n'
-        return response
-    return None
-    # retornar el camino
-    
-def shorterPath (catalog, source, dst):
-    print("vertices: ",source,", ",dst)
-    graph = catalog['Graph']
-    # ejecutar dfs desde source
-    search= bfs.newBFS(graph, source)
-    # obtener el camino hasta dst
-    response = ''
-    t1_start = process_time() #tiempo inicial
-    path = bfs.pathTo(search, dst)
-    if path:
-        iteraPath=it.newIterator(path)
-        while it.hasNext(iteraPath):
-            Vertex = it.next(iteraPath)
-            response += Vertex + '\n'
-        return response
-    t1_stop = process_time() #tiempo final
-    print("Tiempo de ejecución de pathTo:",t1_stop-t1_start," segundos")
-    return None
-    # retornar el camino
+    g.addEdge (catalog['GraphDirected'], row['src'], row['dst'], float(row['duration']))
 
 def mostCapacity(catalog, city, number_capacities):
     rawMap = catalog['capacityMap']
@@ -152,6 +119,51 @@ def mostCapacity(catalog, city, number_capacities):
     TopN = cityCapacityMap[-number_capacities:]
     LessN = cityCapacityMap[:number_capacities-1]
     return TopN, LessN
+
+def tripCityforDates (catalog, start_date, end_date):
+    start_date=strToDate(start_date, '%m/%d/%Y') #Convertir fecha a str
+    end_date=strToDate(end_date, '%m/%d/%Y') #Convertir fecha a str
+    dateList = oms.valueRange(catalog['dateTree'], start_date, end_date, greater) #Valor o nodos? 
+    counter = 0
+    response=''
+    #Corregir para datos actuales
+    cities = map.newMap(capacity=97, maptype='CHAINING')
+    if dateList:
+        iteraDate=it.newIterator(dateList)
+        while it.hasNext(iteraDate):
+            dateElement = it.next(iteraDate)
+            if dateElement['date']:#Si el nodo tiene dicho map
+                    if map.isEmpty(cities):#Si cities está vacío, se le asigna el map de accidentes por ciudad del primer nodo
+                        cities=dateElement['cityMap']
+                    else: #De lo contrario, se compara cada ciudad del map de cada nodo con el map cities
+                        ciudadesNodo=map.keySet(dateElement['cityMap'])#Lista de las ciudades que tuvieron accidentes en esa fecha(nodo)
+                        ciudadesCities=map.keySet(cities)
+                        iteraCiudades=it.newIterator(ciudadesNodo)
+                        while it.hasNext(iteraCiudades):
+                            ciudadElement=it.next(iteraCiudades)#Nombre de la ciudad que está en el cityMap de cada nodo
+                            if ciudadElement:
+                                if lt.isPresent(ciudadesCities, ciudadElement, compareByStr): #Se verifica si la ciudad está en los valores del map cities
+                                    num=map.get(cities, ciudadElement, compareByKey)
+                                    num+=map.get(dateElement['cityMap'], ciudadElement, compareByKey)
+                                    map.put(cities, ciudadElement, num, compareByKey)
+                                else:
+                                    num=map.get(dateElement['cityMap'],ciudadElement,compareByKey)
+                                    map.put(cities, ciudadElement, num, compareByKey)
+
+    if not map.isEmpty(cities):
+        cityList= map.keySet(cities)
+        iteracity=it.newIterator(cityList)
+        while it.hasNext(iteracity):
+            cityKey = it.next(iteracity)
+            response += str(cityKey) + ':' + str(map.get(cities,cityKey,compareByKey)) + " "
+        return counter, response
+    return None
+
+def getShortestPath(catalog, src, dst):
+    pass
+
+
+
 # Funciones de comparacion
 
 def compareByKey (key, element):
@@ -162,3 +174,11 @@ def compareByTuple (tup1, tup2):
         return 1
     if tup1[0]<tup2[0]:
         return -1
+
+def greater (key1, key2):
+    if ( key1 == key2):
+        return 0
+    elif (key1 < key2):
+        return -1
+    else:
+        return 1
