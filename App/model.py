@@ -49,7 +49,10 @@ def newCatalog():
     stationMap = map.newMap(97,maptype='CHAINING',comparefunction=compareByKey)
     tree = oms.newMap()
     gdir = g.newGraph(97, compareByKey, directed=True)
-    catalog = {'capacityMap':capacityMap, 'stationMap': stationMap,"dateTree": tree, "GraphDirected":gdir}
+    tempHash = map.newMap(179, maptype='CHAINING', comparefunction=compareByKey)
+    tempList = lt.newList('ARRAY')
+    catalog = {'capacityMap':capacityMap, 'stationMap': stationMap,"dateTree": tree, 
+    "GraphDirected":gdir, 'temperatureHash': tempHash, 'tempList':tempList}
     return catalog
 
 def addToHash (catalog, row):
@@ -77,11 +80,113 @@ def addToTree (catalog, row):
             dateValue = map.put(dateValue, StationInf, value+1)
         else:
             dateValue = map.put(dateValue, StationInf, 1)
+        totalValue = map.get(dateValue, 'total')
+        totalValue += 1
+        map.put(dateValue, 'total', totalValue)
         tree = oms.put(tree, date, dateValue, greater)
     else:
         DateValueMap = map.newMap(97, 'CHAINING', compareByKey)
-        dateValue = map.put(DateValueMap, StationInf, 1)
-        tree = oms.put(tree, date, dateValue, greater)
+        map.put(DateValueMap, StationInf, 1)
+        map.put(DateValueMap, 'total', 1)
+        tree = oms.put(tree, date, DateValueMap, greater)
+
+def addTempHash (catalog, row):
+    hashTemp = catalog['temperatureHash']
+    date = strToDate(row['date'], '%Y/%m/%d') #Convertir fecha a str
+    if map.contains(catalog['temperatureHash'], row['mean_temperature_f']):
+        dateIList = map.get(catalog['temperatureHash'], row['mean_temperature_f'])
+        lt.addLast(dateIList, date) 
+        map.put(catalog['temperatureHash'], row['temperatureHash'], dateIList)
+    else:
+        dateList = lt.newList('ARRAY')
+        lt.addLast(dateList, date)
+        map.put(hashTemp, row['mean_temperature_f'], dateList)
+
+def tempAux (catalog):
+    tempValues = map.keySet(catalog['temperaturaHash'])
+    mergesort.mergesort(tempValues, greater)
+    catalog['tempList'] = tempValues
+
+def tripsPerTemperature(catalog, number):
+    longList = lt.size(catalog['tempList'])
+    leastTemp = lt.subList(catalog['tempList'],size-number,number)
+    mostTemp = lt.subList(catalog['tempList'], 1, number) #O(1) por ser array
+    counter1 = 0
+    counter2 = 0
+    response1=''
+    response2=''
+    tripsMostTempDays = map.newMap(30, comparefunction=compareByKey)
+    tripsLeastTempDays = map.newMap(30, comparefunction=compareByKey)
+
+    while counter1<number:
+        leastTempIterator = it.newIterator(leastTemp) #Iterar la lista con n menores temperaturas
+        while it.hasNext(leastTempIterator):
+            tempElement = it.next(leastTempIterator) #Temperatura
+            dateListElement = map.get(catalog['temperatureHash'],tempElement)#Sacar todas las fechas para esa temperatura
+            if number - lt.size(dateListElement) < counter:
+                n_dates = lt.subList(dateListElement, 1, number-counter)
+                n_iterator = it.newIterator(n_dates)
+                while it.hasNext(n_iterator):
+                    n_dateElement = it.next(n_iterator)
+                    value = oms.get(catalog['datesTree'], n_dateElement, greater)
+                    value = map.get(value, 'total', compareByKey)
+                    value = (tempElement, value)
+                    map.put(tripsLeastTempDays, n_dateElement, value)
+                counter += lt.size(n_dates)
+            else:
+                n_dates = dateListElement
+                n_iterator = it.newIterator(n_dates)
+                while it.hasNext(n_iterator):
+                    n_dateElement = it.next(n_iterator)
+                    value = oms.get(catalog['datesTree'], n_dateElement, greater)
+                    value = map.get(value, 'total', compareByKey)
+                    value = (tempElement, value)
+                    map.put(tripsLeastTempDays, n_dateElement, value)
+                HashtripsLeastTemp = oms.get(catalog['dateTree'], dateElement, greater)
+                map.get(HashtripsLeastTemp, 'total')
+                counter += lt.size(dateListElement)
+
+    while counter2<number:
+        mostTempIterator = it.newIterator(leastTemp)
+        while it.hasNext(mostTempIterator):
+            tempElement = it.next(mostTempIterator)
+            dateListElement = map.get(catalog['temperatureHash'],tempElement)#Sacar todas las fechas para esa temperatura
+            if number - lt.size(dateListElement) < counter:
+                n_dates = lt.subList(dateListElement, 1, number-counter)
+                n_iterator = it.newIterator(n_dates)
+                while it.hasNext(n_iterator):
+                    n_dateElement = it.next(n_iterator)
+                    value = oms.get(catalog['datesTree'], n_dateElement, greater)
+                    value = map.get(value, 'total', compareByKey)
+                    value = (tempElement, value)
+                    map.put(tripsMostTempDays, n_dateElement, value)
+                counter += lt.size(n_dates)
+            else:
+                n_dates = dateListElement
+                n_iterator = it.newIterator(n_dates)
+                while it.hasNext(n_iterator):
+                    n_dateElement = it.next(n_iterator)
+                    value = oms.get(catalog['datesTree'], n_dateElement, greater)
+                    value = map.get(value, 'total', compareByKey)
+                    value = (tempElement, value)
+                    map.put(tripsMostTempDays, n_dateElement, value)
+                HashtripsMostTemp = oms.get(catalog['dateTree'], dateElement, greater)
+                map.get(HashtripsMostTemp, 'total')
+                counter += lt.size(dateListElement)
+
+    if not map.isEmpty(tripsMostTempDays):
+        tempList= map.keySet(tripsMostTempDays)
+        iteratemp=it.newIterator(tempList)
+        while it.hasNext(iteratemp):
+            tempKey = it.next(iteratemp)
+            response1 += str(tempKey) + ':' + str(map.get(tripsMostTempDays,tempKey,compareByKey)) + " "    
+    if not map.isEmpty(tripsLeastTempDays):
+        tempList= map.keySet(tripsLeastTempDays)
+        iteratemp=it.newIterator(tempList)
+        while it.hasNext(iteratemp):
+            tempKey = it.next(iteratemp)
+            response2 += str(tempKey) + ':' + str(map.get(tripsLeastTempDays,tempKey,compareByKey)) + " "
+    return response1, response2
 
 def strToDate(date_string, format):
     
@@ -98,7 +203,7 @@ def sortHash (catalog):
     while it.hasNext(citiesIter):
         i_city = it.next(citiesIter)
         stationCapacityList = map.get(catalog['capacityMap'], i_city)
-        mergesort.mergesort(stationCapacityList, compareByKey) #Revisar compareFunction
+        mergesort.mergesort(stationCapacityList, compareByTuple)
 
 def addDirectedNode (catalog, row):
     """
@@ -123,46 +228,51 @@ def mostCapacity(catalog, city, number_capacities):
 def tripCityforDates (catalog, start_date, end_date):
     start_date=strToDate(start_date, '%m/%d/%Y') #Convertir fecha a str
     end_date=strToDate(end_date, '%m/%d/%Y') #Convertir fecha a str
-    dateList = oms.valueRange(catalog['dateTree'], start_date, end_date, greater) #Valor o nodos? 
-    counter = 0
+    dateList = oms.valueRange(catalog['dateTree'], start_date, end_date, greater) #Lista de llaves entre las fechas dadas 
     response=''
-    #Corregir para datos actuales
-    cities = map.newMap(capacity=97, maptype='CHAINING')
+    tripsCityDays = map.newMap(capacity=11, maptype='CHAINING') #Se almacenan
     if dateList:
         iteraDate=it.newIterator(dateList)
         while it.hasNext(iteraDate):
             dateElement = it.next(iteraDate)
-            if dateElement['date']:#Si el nodo tiene dicho map
-                    if map.isEmpty(cities):#Si cities está vacío, se le asigna el map de accidentes por ciudad del primer nodo
-                        cities=dateElement['cityMap']
-                    else: #De lo contrario, se compara cada ciudad del map de cada nodo con el map cities
-                        ciudadesNodo=map.keySet(dateElement['cityMap'])#Lista de las ciudades que tuvieron accidentes en esa fecha(nodo)
-                        ciudadesCities=map.keySet(cities)
-                        iteraCiudades=it.newIterator(ciudadesNodo)
+            if oms.get(catalog['dateMap'],dateElement, greater):#Si el nodo tiene un valor asociado
+                    if map.isEmpty(tripCityDates):#Si cities está vacío, se le asigna el map de accidentes por ciudad del primer nodo
+                        tripsCityDays = oms.get(catalog['dateMap'], dateElement, greater)
+                    else: #De lo contrario, se compara cada ciudad del map de cada nodo con el map 
+                        ciudadesNodo = map.keySet(dateElement)#Lista de las ciudades que tuvieron accidentes en esa fecha(nodo)
+                        ciudadesCities = map.keySet(tripsCityDays)
+                        iteraCiudades = it.newIterator(ciudadesNodo)
                         while it.hasNext(iteraCiudades):
-                            ciudadElement=it.next(iteraCiudades)#Nombre de la ciudad que está en el cityMap de cada nodo
+                            ciudadElement=it.next(iteraCiudades)# que está en el map de cada nodo
                             if ciudadElement:
-                                if lt.isPresent(ciudadesCities, ciudadElement, compareByStr): #Se verifica si la ciudad está en los valores del map cities
-                                    num=map.get(cities, ciudadElement, compareByKey)
-                                    num+=map.get(dateElement['cityMap'], ciudadElement, compareByKey)
-                                    map.put(cities, ciudadElement, num, compareByKey)
+                                if lt.isPresent(ciudadesCities, ciudadElement, compareByKey): #Se verifica si la ciudad está en los valores del map 
+                                    num=map.get(tripsCityDays, ciudadElement, compareByKey)
+                                    num+=map.get(dateElement, ciudadElement, compareByKey)
+                                    map.put(tripsCityDays, ciudadElement, num, compareByKey)
                                 else:
-                                    num=map.get(dateElement['cityMap'],ciudadElement,compareByKey)
+                                    num=map.get(dateElement, ciudadElement,compareByKey)
                                     map.put(cities, ciudadElement, num, compareByKey)
 
-    if not map.isEmpty(cities):
-        cityList= map.keySet(cities)
+    if not map.isEmpty(tripsCityDays):
+        cityList= map.keySet(tripsCityDays)
         iteracity=it.newIterator(cityList)
         while it.hasNext(iteracity):
             cityKey = it.next(iteracity)
-            response += str(cityKey) + ':' + str(map.get(cities,cityKey,compareByKey)) + " "
-        return counter, response
+            response += str(cityKey) + ':' + str(map.get(tripsCityDays,cityKey,compareByKey)) + " "
+        return response
     return None
 
-def getShortestPath(catalog, src, dst):
-    pass
-
-
+def getShortestPath (catalog, source, dst):
+    """
+    Retorna el camino de menor costo entre vertice origen y destino, si existe 
+    """
+    print("vertices: ",source,", ",dst)
+    dis=dj.newDijkstra(catalog["GraphDirected"],source)
+    path=dj.pathTo(dis,dst)
+    # ejecutar Dijkstra desde source
+    # obtener el camino hasta dst
+    # retornar el camino
+    return path
 
 # Funciones de comparacion
 

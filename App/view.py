@@ -80,16 +80,21 @@ def main():
         elif int(inputs[0])==3: #Requerimento 2
             dates = input("Ingrese las fechas a consultar separadas por un espacio: ")
             tripsCityforDates = controller.tripsCityforDates(catalog, dates)
-            #Imprima bonito
         elif int(inputs[0]==4): #Requerimento 3
-            
+            number=input("Ingrese un número n para obtener los n días con mayor y menor temperatura y sus viajes: ")
+            tripsTempDate = controller.tripsPerTemperatureDate(catalog, number)
+            print("Los días con mayor y menor temperatura tienen los siguientes viajes: ", tripsTempDate)
         elif int(inputs[0]==5): #Requerimento 4
+            vertices =input("Ingrese el vertice origen y destino\n")
+            path = controller.getShortestPath(catalog,vertices)
+            print("El camino de menor costo entre los vertices es:")
+            totalDist = 0
             if path:
                 while not stk.isEmpty(path):
                     step = stk.pop(path)
                     totalDist += step['weight']
                     print (step['vertexA'] + "-->" + step['vertexB'] + " costo: " + str(step['weight']))
-                print ("Total: " + str (totalDist))
+            print ("Total: " + str (totalDist))
         else:
             sys.exit(0)
     sys.exit(0)
