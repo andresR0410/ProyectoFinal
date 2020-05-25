@@ -47,11 +47,9 @@ def printList (lst):
 
 
 # Funciones para la carga de datos 
-def loadFlights (catalog, sep=';'):
+def loadTrips (catalog, sep=';'):
     """
-    Carga los libros del archivo.  Por cada libro se toman sus autores y por 
-    cada uno de ellos, se crea un arbol de autores, a dicho autor y una
-    referencia al libro que se esta procesando.
+    Carga los viajes del archivo. 
     """
     t1_start = process_time() #tiempo inicial
     hashValues = cf.data_dir + 'station.csv'
@@ -81,9 +79,10 @@ def loadFlights (catalog, sep=';'):
         t4_stop = process_time() #tiempo final
     model.tempAux(catalog)
     t1_stop = process_time() #tiempo final
-    print("Tiempo de ejecución carga de tabla de hash (req1) de estaciones por capacidad por ciudad",t2_stop-t2_start," segundos\n"
+    print("Tiempo de ejecución carga de tabla de hash (req1) de estaciones por capacidad por ciudad",t2_stop-t2_start," segundos\n")
+    print("Tiempo de ejecución carga de arbol por fecha (req2)", t3_stop-t3_start, "segundos\n")
+    print("Tiempo de ejecución carga de tabla de Hash (req3) de fechas por temperatura", t4_stop-t4_start, "segundos\n")
     print("Tiempo de ejecución carga de todos los datos: ",t1_stop-t1_start," segundos\n")
-     
 
 def initCatalog ():
     """
@@ -98,7 +97,7 @@ def loadData (catalog):
     """
     Carga los datos de los archivos en la estructura de datos
     """
-    loadFlights(catalog)    
+    loadTrips(catalog)    
 
 # Funciones llamadas desde la vista y enviadas al modelo
 
@@ -125,12 +124,12 @@ def tripCityforDates (catalog, dates):
     end_date=dates.split(" ")[1]
     tripCitiesDates = model.tripCityforDates(catalog, start_date, end_date)
     t1_stop = process_time() #tiempo final
-    print("Tiempo de ejecución de tripCityforDates: "t1_stop-t1_start," segundos")
+    print("Tiempo de ejecución de tripCityforDates: ", t1_stop-t1_start," segundos")
     return tripCitiesDates
 
 def tripsPerTemperatureDate(catalog, number):
     t1_start = process_time() #tiempo inicial
-    tripCitiesDates = model.tripsPerTemperature(catalog, number)
+    tripsTempDates = model.tripsPerTemperature(catalog, number)
     t1_stop = process_time() #tiempo final
-    print("Tiempo de ejecución de tripsPerTemperaturaDate: "t1_stop-t1_start," segundos")
+    print("Tiempo de ejecución de tripsPerTemperaturaDate: ", t1_stop-t1_start," segundos")
     return tripsTempDates

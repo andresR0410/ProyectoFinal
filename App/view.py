@@ -75,11 +75,13 @@ def main():
             catalog = initCatalog ()
             loadData (catalog)
         elif int(inputs[0])==2:#Requerimento 1
+            city = input("Ingrese el nombre de la ciudad que desea consultar")
             mostCapacity = controller.mostCapacity (catalog, city, 3)
             print(mostCapacity)
         elif int(inputs[0])==3: #Requerimento 2
             dates = input("Ingrese las fechas a consultar separadas por un espacio: ")
-            tripsCityforDates = controller.tripsCityforDates(catalog, dates)
+            trips = controller.tripCityforDates(catalog, dates)
+            print (trips)
         elif int(inputs[0]==4): #Requerimento 3
             number=input("Ingrese un número n para obtener los n días con mayor y menor temperatura y sus viajes: ")
             tripsTempDate = controller.tripsPerTemperatureDate(catalog, number)
