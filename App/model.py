@@ -188,14 +188,6 @@ def tripsPerTemperature(catalog, number):
             response2 += str(tempKey) + ':' + str(map.get(tripsLeastTempDays,tempKey)) + " "
     return response1, response2
 
-def strToDate(date_string, format):
-    
-    try:
-        # date_string = '2016/05/18 13:55:26' -> format = '%Y/%m/%d %H:%M:%S')
-        return datetime.strptime(date_string,format)
-    except:
-        return datetime.strptime('1900', '%Y')
-
 def sortHash (catalog):
     #Iterar tabla de hash, extraer lista de llaves, ordenar cada lista de tuplas con mergeSort
     citiesList = map.keySet(catalog['capacityMap'])
@@ -218,6 +210,7 @@ def addDirectedEdge (catalog, row):
     """
     g.addEdge (catalog['GraphDirected'], row['src'], row['dst'], float(row['duration']))
 
+#funciones de consulta
 def mostCapacity(catalog, city, number_capacities):
     rawMap = catalog['capacityMap']
     cityCapacityMap = map.get(rawMap, city)
@@ -292,3 +285,11 @@ def greater (key1, key2):
         return -1
     else:
         return 1
+
+def strToDate(date_string, format):
+    
+    try:
+        # date_string = '2016/05/18 13:55:26' -> format = '%Y/%m/%d %H:%M:%S')
+        return datetime.strptime(date_string,format)
+    except:
+        return datetime.strptime('1900', '%Y')
