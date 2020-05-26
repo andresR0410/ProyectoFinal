@@ -85,7 +85,7 @@ def addToTree (catalog, row):
         map.put(dateValue, 'total', totalValue)
         tree = oms.put(tree, date, dateValue, greater)
     else:
-        DateValueMap = map.newMap(97, 'CHAINING', compareByKey)
+        DateValueMap = map.newMap(maptype='PROBING', comparefunction= compareByKey)
         map.put(DateValueMap, StationInf, 1)
         map.put(DateValueMap, 'total', 1)
         tree = oms.put(tree, date, DateValueMap, greater)
@@ -201,8 +201,12 @@ def addDirectedNode (catalog, row):
     """
     Adiciona un nodo para almacenar un libro o usuario 
     """
-    if not g.containsVertex(catalog['GraphDirected'], row['start_station_id']):
-        g.insertVertex (catalog['GraphDirected'], row['start_station_id'])
+    source = row['src']
+    dest = row['dst']
+    if not g.containsVertex(catalog['GraphDirected'], source):
+        g.insertVertex (catalog['GraphDirected'], source)
+    if not g.containsVertex(catalog['GraphDirected'], dest):
+        g.insertVertex (catalog['GraphDirected'], dest)
 
 def addDirectedEdge (catalog, row):
     """

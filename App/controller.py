@@ -52,13 +52,13 @@ def loadTrips (catalog, sep=';'):
     Carga los viajes del archivo. 
     """
     t1_start = process_time() #tiempo inicial
-    hashValues = cf.data_dir + 'station.csv'
-    tree =  cf.data_dir + 'trip.csv'
-    temperatureHash = cf.data_dir + 'weather.csv'
+    station = cf.data_dir + 'station.csv'
+    trips =  cf.data_dir + 'trip.csv'
+    temperature = cf.data_dir + 'weather.csv'
     tripedges = cf.data_dir + 'tripday_edges.csv'
     dialect = csv.excel()
     dialect.delimiter=sep
-    with open(hashValues, encoding="utf-8-sig") as csvfile:
+    with open(station, encoding="utf-8-sig") as csvfile:
         spamreader = csv.DictReader(csvfile, dialect=dialect)
         t2_start = process_time() #tiempo inicial
         for row in spamreader:
@@ -66,13 +66,13 @@ def loadTrips (catalog, sep=';'):
             model.addToStationHash(catalog,row)
         t2_stop = process_time() #tiempo final
     model.sortHash(catalog['capacityMap'])
-    with open(tree, encoding="utf-8-sig") as csvfile:
+    with open(trips, encoding="utf-8-sig") as csvfile:
         spamreader = csv.DictReader(csvfile, dialect=dialect)
         t3_start = process_time() #tiempo inicial
         for row in spamreader:
             model.addToTree(catalog, row)
         t3_stop = process_time() #tiempo final
-    with open(temperatureHash, encoding="utf-8-sig") as csvfile:
+    with open(temperature, encoding="utf-8-sig") as csvfile:
         spamreader = csv.DictReader(csvfile, dialect=dialect)
         t4_start = process_time() #tiempo inicial
         for row in spamreader:
