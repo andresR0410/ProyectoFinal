@@ -50,7 +50,7 @@ def newCatalog():
     tree = oms.newMap('RBT')
     gdir = g.newGraph(97, compareByKey, directed=True)
     tempHash = map.newMap(179, maptype='CHAINING', comparefunction=compareByKey)
-    tempList = lt.newList('ARRAY')
+    tempList = lt.newList('ARRAY_LIST')
     catalog = {'capacityMap':capacityMap, 'stationMap': stationMap,"dateTree": tree, 
     "GraphDirected":gdir, 'temperatureHash': tempHash, 'tempList':tempList}
     return catalog
@@ -61,7 +61,7 @@ def addToHash (catalog, row):
         statcapList = map.get(catalog['capacityMap'],row['city'])
         lt.addFirst(statcapList,capacity_station)
     else:
-        stationCapacityList = lt.newList('ARRAY')
+        stationCapacityList = lt.newList('ARRAY_LIST')
         lt.addFirst(stationCapacityList,capacity_station)
         map.put(catalog['capacityMap'],row['city'], stationCapacityList)
 
