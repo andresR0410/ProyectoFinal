@@ -47,7 +47,7 @@ def printList (lst):
 
 
 # Funciones para la carga de datos 
-def loadTrips (catalog, sep=';'):
+def loadTrips (catalog, sep=','):
     """
     Carga los viajes del archivo. 
     """
@@ -79,6 +79,7 @@ def loadTrips (catalog, sep=';'):
             model.addTempHash(catalog, row)
         t4_stop = process_time() #tiempo final
     model.tempAux(catalog)
+    dialect.delimiter="";""
     with open(tripedges, encoding="utf-8-sig") as csvfile:
         spamreader = csv.DictReader(csvfile, dialect=dialect)
         t5_start = process_time() #tiempo inicial
