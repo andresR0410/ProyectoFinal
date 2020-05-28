@@ -65,13 +65,15 @@ def loadTrips (catalog, sep=','):
             model.addToHash(catalog, row)
             model.addToStationHash(catalog,row)
         t2_stop = process_time() #tiempo final
-    model.sortHash(catalog['capacityMap'])
+    model.sortHash(catalog)
+    print("Tiempo de ejecución carga de tabla de hash (req1) de estaciones por capacidad por ciudad",t2_stop-t2_start," segundos\n")
     with open(trips, encoding="utf-8-sig") as csvfile:
         spamreader = csv.DictReader(csvfile, dialect=dialect)
         t3_start = process_time() #tiempo inicial
         for row in spamreader:
             model.addToTree(catalog, row)
         t3_stop = process_time() #tiempo final
+    print("Tiempo de ejecución carga de arbol por fecha (req2)", t3_stop-t3_start, "segundos\n")
     with open(temperature, encoding="utf-8-sig") as csvfile:
         spamreader = csv.DictReader(csvfile, dialect=dialect)
         t4_start = process_time() #tiempo inicial
@@ -79,7 +81,8 @@ def loadTrips (catalog, sep=','):
             model.addTempHash(catalog, row)
         t4_stop = process_time() #tiempo final
     model.tempAux(catalog)
-    dialect.delimiter="";""
+    print("Tiempo de ejecución carga de tabla de Hash (req3) de fechas por temperatura", t4_stop-t4_start, "segundos\n")
+    dialect.delimiter=';'
     with open(tripedges, encoding="utf-8-sig") as csvfile:
         spamreader = csv.DictReader(csvfile, dialect=dialect)
         t5_start = process_time() #tiempo inicial
@@ -88,9 +91,6 @@ def loadTrips (catalog, sep=','):
             model.addDirectedEdge (catalog, row)
         t5_stop = process_time() #tiempo final
     t1_stop = process_time() #tiempo final
-    print("Tiempo de ejecución carga de tabla de hash (req1) de estaciones por capacidad por ciudad",t2_stop-t2_start," segundos\n")
-    print("Tiempo de ejecución carga de arbol por fecha (req2)", t3_stop-t3_start, "segundos\n")
-    print("Tiempo de ejecución carga de tabla de Hash (req3) de fechas por temperatura", t4_stop-t4_start, "segundos\n")
     print("Tiempo de ejecución carga de grafo dirigido (req4) de viajes", t5_stop-t5_start, "segundos\n")
     print("Tiempo de ejecución carga de todos los datos: ",t1_stop-t1_start," segundos\n")
 

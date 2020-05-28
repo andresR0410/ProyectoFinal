@@ -58,11 +58,11 @@ def newCatalog():
 def addToHash (catalog, row):
     capacity_station = (row['dock_count'],row['id']) 
     if map.contains(catalog['capacityMap'],row['city']):
-        statcapList = map.get(catalog['capacityMap'],row['city'])
-        lt.addFirst(statcapList,capacity_station)
+        statcapList = map.get(catalog['capacityMap'],row['city'])['value']
+        lt.addLast(statcapList,capacity_station)
     else:
         stationCapacityList = lt.newList('ARRAY_LIST')
-        lt.addFirst(stationCapacityList,capacity_station)
+        lt.addLast(stationCapacityList,capacity_station)
         map.put(catalog['capacityMap'],row['city'], stationCapacityList)
 
 def addToStationHash (catalog, row):
@@ -72,15 +72,15 @@ def addToStationHash (catalog, row):
 def addToTree (catalog, row):
     tree=catalog['dateTree'] #Árbol RBT ordenado por fecha
     date=strToDate(row['start_date'], '%m/%d/%Y') #Convertir fecha a str
-    StationInf = map.get(catalog['stationMap'], row['start_station_id'])[1] #Ciudad de la estación 
+    StationInf = map.get(catalog['stationMap'], row['start_station_id'])['value'][1] #Ciudad de la estación 
     if oms.contains(tree, date, greater):
         dateValue = oms.get(tree, date, greater)
         if map.contains(dateValue, StationInf):
-            value = map.get(dateValue, StationInf)
+            value = map.get(dateValue, StationInf)['value']
             map.put(dateValue, StationInf, value+1)
         else:
             map.put(dateValue, StationInf, 1)
-        totalValue = map.get(dateValue, 'total')
+        totalValue = map.get(dateValue, 'total')['value']
         totalValue += 1
         map.put(dateValue, 'total', totalValue)
         tree = oms.put(tree, date, dateValue, greater)
@@ -94,16 +94,16 @@ def addTempHash (catalog, row):
     hashTemp = catalog['temperatureHash']
     date = strToDate(row['date'], '%Y/%m/%d') #Convertir fecha a str
     if map.contains(catalog['temperatureHash'], row['mean_temperature_f']):
-        dateIList = map.get(catalog['temperatureHash'], row['mean_temperature_f'])
+        dateIList = map.get(catalog['temperatureHash'], row['mean_temperature_f'])['value']
         lt.addLast(dateIList, date) 
-        map.put(catalog['temperatureHash'], row['temperatureHash'], dateIList)
+        map.put(hashTemp, row['mean_temperature_f'], dateIList)
     else:
         dateList = lt.newList('ARRAY')
         lt.addLast(dateList, date)
         map.put(hashTemp, row['mean_temperature_f'], dateList)
 
 def tempAux (catalog):
-    tempValues = map.keySet(catalog['temperaturaHash'])
+    tempValues = map.keySet(catalog['temperatureHash'])
     mergesort.mergesort(tempValues, greater)
     catalog['tempList'] = tempValues
 
@@ -122,7 +122,7 @@ def tripsPerTemperature(catalog, number):
         leastTempIterator = it.newIterator(leastTemp) #Iterar la lista con n menores temperaturas
         while it.hasNext(leastTempIterator):
             tempElement = it.next(leastTempIterator) #Temperatura
-            dateListElement = map.get(catalog['temperatureHash'],tempElement)#Lista de todas las fechas para esa temperatura
+            dateListElement = map.get(catalog['temperatureHash'],tempElement)['value']#Lista de todas las fechas para esa temperatura
             if number - lt.size(dateListElement) < counter1: 
                 #si no se pueden agregar todas las fechas de esa temperatura sin alcanzar el n deseado
                 n_dates = lt.subList(dateListElement, 1, number-counter1) #lista de las que si se pueden agragar
@@ -130,7 +130,7 @@ def tripsPerTemperature(catalog, number):
                 while it.hasNext(n_iterator):
                     n_dateElement = it.next(n_iterator) #fecha a agregar
                     trips = oms.get(catalog['datesTree'], n_dateElement, greater) #hash de viajes de esa fecha
-                    totaltrip = map.get(trips, 'total') #número de viajes totales en esa fecha
+                    totaltrip = map.get(trips, 'total')['value'] #número de viajes totales en esa fecha
                     value = (tempElement, totaltrip) #tupla que se asigna como valor de cada fecha: temperatura, viajes totales
                     map.put(tripsLeastTempDays, n_dateElement, value)
                 counter1 += lt.size(n_dates)#el número de fechas que se agregó se suma al counter
@@ -141,7 +141,7 @@ def tripsPerTemperature(catalog, number):
                 while it.hasNext(n_iterator):
                     n_dateElement = it.next(n_iterator) #fecha a agregar
                     trips = oms.get(catalog['datesTree'], n_dateElement, greater)
-                    totaltrip = map.get(trips, 'total')
+                    totaltrip = map.get(trips, 'total')['value']
                     value = (tempElement, totaltrip)
                     map.put(tripsLeastTempDays, n_dateElement, value)
                 counter1 += lt.size(dateListElement)
@@ -150,7 +150,7 @@ def tripsPerTemperature(catalog, number):
         mostTempIterator = it.newIterator(mostTemp) #Iterar la lista con n temperaturas más altas
         while it.hasNext(mostTempIterator):
             tempElement = it.next(mostTempIterator)
-            dateListElement = map.get(catalog['temperatureHash'],tempElement)#Lista de todas las fechas para esa temperatura
+            dateListElement = map.get(catalog['temperatureHash'],tempElement)['value']#Lista de todas las fechas para esa temperatura
             if number - lt.size(dateListElement) < counter2:
                 #si no se pueden agregar todas las fechas de esa temperatura sin alcanzar el n deseado
                 n_dates = lt.subList(dateListElement, 1, number-counter2)
@@ -158,7 +158,7 @@ def tripsPerTemperature(catalog, number):
                 while it.hasNext(n_iterator):
                     n_dateElement = it.next(n_iterator)
                     value = oms.get(catalog['datesTree'], n_dateElement, greater)
-                    value = map.get(value, 'total')
+                    value = map.get(value, 'total')['value']
                     value = (tempElement, value)
                     map.put(tripsMostTempDays, n_dateElement, value)
                 counter2 += lt.size(n_dates)
@@ -169,7 +169,7 @@ def tripsPerTemperature(catalog, number):
                 while it.hasNext(n_iterator):
                     n_dateElement = it.next(n_iterator)
                     value = oms.get(catalog['datesTree'], n_dateElement, greater)
-                    value = map.get(value, 'total')
+                    value = map.get(value, 'total')['value']
                     value = (tempElement, value)
                     map.put(tripsMostTempDays, n_dateElement, value)
                 counter2 += lt.size(dateListElement)
@@ -179,13 +179,13 @@ def tripsPerTemperature(catalog, number):
         iteratemp=it.newIterator(tempList)
         while it.hasNext(iteratemp):
             tempKey = it.next(iteratemp)
-            response1 += str(tempKey) + ':' + str(map.get(tripsMostTempDays,tempKey)) + " "    
+            response1 += str(tempKey) + ':' + str(map.get(tripsMostTempDays,tempKey)['value']) + " "    
     if not map.isEmpty(tripsLeastTempDays):
         tempList= map.keySet(tripsLeastTempDays)
         iteratemp=it.newIterator(tempList)
         while it.hasNext(iteratemp):
             tempKey = it.next(iteratemp)
-            response2 += str(tempKey) + ':' + str(map.get(tripsLeastTempDays,tempKey)) + " "
+            response2 += str(tempKey) + ':' + str(map.get(tripsLeastTempDays,tempKey)['value']) + " "
     return response1, response2
 
 def sortHash (catalog):
@@ -194,7 +194,7 @@ def sortHash (catalog):
     citiesIter = it.newIterator(citiesList)
     while it.hasNext(citiesIter):
         i_city = it.next(citiesIter)
-        stationCapacityList = map.get(catalog['capacityMap'], i_city)
+        stationCapacityList = map.get(catalog['capacityMap'], i_city)['value']
         mergesort.mergesort(stationCapacityList, compareByTuple)
 
 def addDirectedNode (catalog, row):
@@ -217,7 +217,7 @@ def addDirectedEdge (catalog, row):
 #funciones de consulta
 def mostCapacity(catalog, city, number_capacities):
     rawMap = catalog['capacityMap']
-    cityCapacityMap = map.get(rawMap, city)
+    cityCapacityMap = map.get(rawMap, city)['value']
     TopN = cityCapacityMap[-number_capacities:]
     LessN = cityCapacityMap[:number_capacities-1]
     return TopN, LessN
@@ -243,11 +243,11 @@ def tripCityforDates (catalog, start_date, end_date):
                             ciudadElement=it.next(iteraCiudades)# que está en el map de cada nodo
                             if ciudadElement:
                                 if lt.isPresent(ciudadesCities, ciudadElement, compareByKey): #Se verifica si la ciudad está en los valores del map 
-                                    num=map.get(tripsCityDays, ciudadElement)
-                                    num+=map.get(dateElement, ciudadElement)
+                                    num=map.get(tripsCityDays, ciudadElement)['value']
+                                    num+=map.get(dateElement, ciudadElement)['value']
                                     map.put(tripsCityDays, ciudadElement, num)
                                 else:
-                                    num= map.get(dateElement, ciudadElement)
+                                    num= map.get(dateElement, ciudadElement)['value']
                                     map.put(dateElement, ciudadElement, num)
 
     if not map.isEmpty(tripsCityDays):
@@ -255,7 +255,7 @@ def tripCityforDates (catalog, start_date, end_date):
         iteracity=it.newIterator(cityList)
         while it.hasNext(iteracity):
             cityKey = it.next(iteracity)
-            response += str(cityKey) + ':' + str(map.get(tripsCityDays,cityKey)) + " "
+            response += str(cityKey) + ':' + str(map.get(tripsCityDays,cityKey)['value']) + " "
         return response
     return None
 
