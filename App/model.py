@@ -71,7 +71,8 @@ def addToStationHash (catalog, row):
     
 def addToTree (catalog, row):
     tree=catalog['dateTree'] #Árbol RBT ordenado por fecha
-    date=strToDate(row['start_date'], '%m/%d/%Y') #Convertir fecha a str
+    date_raw= row['start_date'].split(" ")[0]
+    date=strToDate(date_raw, '%m/%d/%Y') #Convertir fecha a str
     StationInf = map.get(catalog['stationMap'], row['start_station_id'])['value'][1] #Ciudad de la estación 
     if oms.contains(tree, date, greater):
         dateValue = oms.get(tree, date, greater)
@@ -92,7 +93,7 @@ def addToTree (catalog, row):
 
 def addTempHash (catalog, row):
     hashTemp = catalog['temperatureHash']
-    date = strToDate(row['date'], '%Y/%m/%d') #Convertir fecha a str
+    date = strToDate(row['date'], '%Y-%m-%d') #Convertir fecha a str
     if map.contains(catalog['temperatureHash'], row['mean_temperature_f']):
         dateIList = map.get(catalog['temperatureHash'], row['mean_temperature_f'])['value']
         lt.addLast(dateIList, date) 
@@ -129,7 +130,8 @@ def tripsPerTemperature(catalog, number):
                 n_iterator = it.newIterator(n_dates)
                 while it.hasNext(n_iterator):
                     n_dateElement = it.next(n_iterator) #fecha a agregar
-                    trips = oms.get(catalog['datesTree'], n_dateElement, greater) #hash de viajes de esa fecha
+                    trips = oms.get(catalog['dateTree'], n_dateElement, greater) #hash de viajes de esa fecha
+                    #print(type(trips))
                     totaltrip = map.get(trips, 'total')['value'] #número de viajes totales en esa fecha
                     value = (tempElement, totaltrip) #tupla que se asigna como valor de cada fecha: temperatura, viajes totales
                     map.put(tripsLeastTempDays, n_dateElement, value)
@@ -140,7 +142,8 @@ def tripsPerTemperature(catalog, number):
                 n_iterator = it.newIterator(n_dates)
                 while it.hasNext(n_iterator):
                     n_dateElement = it.next(n_iterator) #fecha a agregar
-                    trips = oms.get(catalog['datesTree'], n_dateElement, greater)
+                    trips = oms.get(catalog['dateTree'], n_dateElement, greater)
+                    #print(type(trips))
                     totaltrip = map.get(trips, 'total')['value']
                     value = (tempElement, totaltrip)
                     map.put(tripsLeastTempDays, n_dateElement, value)
@@ -157,7 +160,7 @@ def tripsPerTemperature(catalog, number):
                 n_iterator = it.newIterator(n_dates)
                 while it.hasNext(n_iterator):
                     n_dateElement = it.next(n_iterator)
-                    value = oms.get(catalog['datesTree'], n_dateElement, greater)
+                    value = oms.get(catalog['dateTree'], n_dateElement, greater)
                     value = map.get(value, 'total')['value']
                     value = (tempElement, value)
                     map.put(tripsMostTempDays, n_dateElement, value)
@@ -168,7 +171,7 @@ def tripsPerTemperature(catalog, number):
                 n_iterator = it.newIterator(n_dates)
                 while it.hasNext(n_iterator):
                     n_dateElement = it.next(n_iterator)
-                    value = oms.get(catalog['datesTree'], n_dateElement, greater)
+                    value = oms.get(catalog['dateTree'], n_dateElement, greater)
                     value = map.get(value, 'total')['value']
                     value = (tempElement, value)
                     map.put(tripsMostTempDays, n_dateElement, value)
@@ -243,18 +246,20 @@ def leastCapacity(catalog, city, ncapacities):
     return None
 
 def tripCityforDates (catalog, start_date, end_date):
-    start_date=strToDate(start_date, '%m/%d/%Y') #Convertir fecha a str
-    end_date=strToDate(end_date, '%m/%d/%Y') #Convertir fecha a str
+    start_date=strToDate(start_date, '%m/%d/%Y') #Convertir fecha 
+    end_date=strToDate(end_date, '%m/%d/%Y') #Convertir fecha 
     dateList = oms.valueRange(catalog['dateTree'], start_date, end_date, greater) #Lista de llaves entre las fechas dadas 
     response=''
     tripsCityDays = map.newMap(capacity=11, maptype='CHAINING') #Se almacenan
     if dateList:
+        print(dateList)
         iteraDate=it.newIterator(dateList)
         while it.hasNext(iteraDate):
             dateElement = it.next(iteraDate)
-            if oms.get(catalog['dateMap'],dateElement, greater):#Si el nodo tiene un valor asociado
+            #print(dateElement)
+            if oms.get(catalog['dateTree'],dateElement, greater):#Si el nodo tiene un valor asociado
                     if map.isEmpty(tripsCityDays):#Si cities está vacío, se le asigna el map de accidentes por ciudad del primer nodo
-                        tripsCityDays = oms.get(catalog['dateMap'], dateElement, greater)
+                        tripsCityDays = oms.get(catalog['dateTree'], dateElement, greater)
                     else: #De lo contrario, se compara cada ciudad del map de cada nodo con el map 
                         ciudadesNodo = map.keySet(dateElement)#Lista de las ciudades que tuvieron accidentes en esa fecha(nodo)
                         ciudadesCities = map.keySet(tripsCityDays)

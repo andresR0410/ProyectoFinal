@@ -82,11 +82,11 @@ def main():
             dates = input("Ingrese las fechas a consultar separadas por un espacio: ")
             trips = controller.tripCityforDates(catalog, dates)
             print (trips)
-        elif int(inputs[0]==4): #Requerimento 3
-            number=input("Ingrese un número n para obtener los n días con mayor y menor temperatura y sus viajes: ")
+        elif int(inputs[0])==4: #Requerimento 3
+            number=int(input("Ingrese un número n para obtener los n días con mayor y menor temperatura y sus viajes: "))
             tripsTempDate = controller.tripsPerTemperatureDate(catalog, number)
             print("Los días con mayor y menor temperatura tienen los siguientes viajes: ", tripsTempDate)
-        elif int(inputs[0]==5): #Requerimento 4
+        elif int(inputs[0])==5: #Requerimento 4
             vertices =input("Ingrese el vertice origen y destino\n")
             path = controller.getShortestPath(catalog,vertices)
             print("El camino de menor costo entre los vertices es:")
