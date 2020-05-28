@@ -215,12 +215,32 @@ def addDirectedEdge (catalog, row):
     g.addEdge (catalog['GraphDirected'], row['src'], row['dst'], float(row['duration']))
 
 #funciones de consulta
-def mostCapacity(catalog, city, number_capacities):
+def mostCapacity(catalog, city, ncapacities):
     rawMap = catalog['capacityMap']
-    cityCapacityMap = map.get(rawMap, city)['value']
-    TopN = cityCapacityMap[-number_capacities:]
-    LessN = cityCapacityMap[:number_capacities-1]
-    return TopN, LessN
+    statcapList = map.get(rawMap, city)['value']
+    response= "Top capacity stations: "
+    size = lt.size(statcapList)
+    TopN = lt.subList(statcapList, size-ncapacities+1, ncapacities)
+    if not lt.isEmpty(TopN):
+        iteratop=it.newIterator(TopN)
+        while it.hasNext(iteratop):
+            station = it.next(iteratop)
+            response += str(station) + ':' + " "
+        return response
+    return None
+
+def leastCapacity(catalog, city, ncapacities):
+    rawMap = catalog['capacityMap']
+    statcapList = map.get(rawMap, city)['value']
+    response = "Least capacity stations: "
+    LessN = lt.subList(statcapList, 1, ncapacities)
+    if not lt.isEmpty(LessN):
+        iteraless=it.newIterator(LessN)
+        while it.hasNext(iteraless):
+            station = it.next(iteraless)
+            response += str(station) + ':' + " "
+        return response
+    return None
 
 def tripCityforDates (catalog, start_date, end_date):
     start_date=strToDate(start_date, '%m/%d/%Y') #Convertir fecha a str

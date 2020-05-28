@@ -76,8 +76,8 @@ def main():
             loadData (catalog)
         elif int(inputs[0])==2:#Requerimento 1
             city = input("Ingrese el nombre de la ciudad que desea consultar")
-            mostCapacity = controller.mostCapacity (catalog, city, 3)
-            print(mostCapacity)
+            controller.mostCapacity (catalog, city, 3)
+            print("para cada estación se indica: ('capacidad', 'id')")
         elif int(inputs[0])==3: #Requerimento 2
             dates = input("Ingrese las fechas a consultar separadas por un espacio: ")
             trips = controller.tripCityforDates(catalog, dates)

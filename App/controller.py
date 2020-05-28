@@ -86,9 +86,9 @@ def loadTrips (catalog, sep=','):
     with open(tripedges, encoding="utf-8-sig") as csvfile:
         spamreader = csv.DictReader(csvfile, dialect=dialect)
         t5_start = process_time() #tiempo inicial
-        for row in spamreader:
-            model.addDirectedNode (catalog, row)
-            model.addDirectedEdge (catalog, row)
+        #for row in spamreader:
+            #model.addDirectedNode (catalog, row)
+            #model.addDirectedEdge (catalog, row)
         t5_stop = process_time() #tiempo final
     t1_stop = process_time() #tiempo final
     print("Tiempo de ejecución carga de grafo dirigido (req4) de viajes", t5_stop-t5_start, "segundos\n")
@@ -123,10 +123,10 @@ def getShortestPath(catalog, vertices):
 def mostCapacity (catalog, city, number_capacities):
     t1_start = process_time() #tiempo inicial
     mostCapacities = model.mostCapacity(catalog, city, number_capacities)
+    leastCapacity = model.leastCapacity(catalog, city, number_capacities)
     t1_stop = process_time() #tiempo final
     print("Tiempo de ejecución de mostCapacity",t1_stop-t1_start," segundos")
-    mostCapacities=('Top'+str(number_capacities)+': ',mostCapacities[0]+'\n'+ 'Less'+str(number_capacities)+': ',mostCapacities[1])
-    return mostCapacities
+    print(mostCapacities, "\n", leastCapacity)
 
 def tripCityforDates (catalog, dates):
     t1_start = process_time() #tiempo inicial
